@@ -1,0 +1,39 @@
+{
+  "RESTAPI": {
+    "/auth/login": "POST",
+    "/auth/logout": "POST",
+    "/auth/refresh": "POST",
+    "/auth/checkPassword": "POST",
+    "/users/{userId}": "GET",
+    "/users/{userId}": "POST",
+    "/users/{userId}": "PUT",
+    "/users/{userId}": "DELETE",
+    "/alarms/{division}": "GET",
+    "/alarms/{division}": "POST",
+    "/alarms/{division}/{alarmId}": "DELETE"
+  },
+  "Models": {
+    "user": {
+      "key": "string",
+      "division": "string - could be division or manager",
+      "password": "string"
+    },
+    "alarm": {
+      "id": "string",
+      "day": "Day enum",
+      "hour": "number",
+      "minute": "number",
+      "repeat": "boolean",
+      "lastTriggered": "number | undefined",
+      "title": "string",
+      "musicId": "string"
+    },
+    "music": {
+      "id": "string",
+      "name": "string",
+      "upload_date": "Date",
+      "duration": "number",
+      "file": "Blob"
+    }
+  }
+}

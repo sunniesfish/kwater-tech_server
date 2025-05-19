@@ -1,16 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { Day } from '../constants/enums';
+import { Day, Division } from '../../global/types';
 
-export type AlarmDocument = Alarm & Document;
-
-@Schema({ timestamps: false })
-export class Alarm {
+@Schema()
+export class Alarm extends Document {
   @Prop({ required: true })
-  id: string;
+  declare id: string;
 
-  @Prop({ required: true, type: [String], enum: Day })
-  day: Day[];
+  @Prop({ required: true, enum: Day })
+  day: Day;
 
   @Prop({ required: true })
   hour: number;
@@ -29,6 +27,9 @@ export class Alarm {
 
   @Prop({ required: true })
   musicId: string;
+
+  @Prop({ required: true })
+  division: Division;
 }
 
 export const AlarmSchema = SchemaFactory.createForClass(Alarm);

@@ -1,0 +1,35 @@
+Method:
+  Alarm:
+    - create: 알람 생성
+    - update: 알람 수정 - 사업소 및 팀 변경도 여기서함
+    - delete: 알람 삭제
+    - get: 알람 조회
+    - get_all: 알람 전체 조회
+
+  Division:
+    - create: 부서 생성
+    - update: 부서 수정
+    - delete: 부서 삭제
+    - get: 부서 조회
+    - get_all: 부서 전체 조회
+
+  Team:
+    - create: 팀 생성
+    - update: 팀 수정
+    - delete: 팀 삭제
+    - get: 팀 조회
+    - get_all: 팀 전체 조회
+
+  User:
+    - create: 사용자 생성
+    - update: 사용자 수정
+    - delete: 사용자 삭제
+    - get: 사용자 조회
+    - get_all: 사용자 전체 조회
+
+  Music:
+    - create: 음악 생성
+    - update: 음악 수정
+    - delete: 음악 삭제
+    - get: 음악 조회
+    - get_all: 음악 전체 조회
