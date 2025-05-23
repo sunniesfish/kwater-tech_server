@@ -4,9 +4,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { AlarmModule } from './alarm/alarm.module';
-
+import { EventEmitterModule } from '@nestjs/event-emitter';
 @Module({
   imports: [
+    EventEmitterModule.forRoot({
+      wildcard: false,
+      verboseMemoryLeak: true,
+      global: true,
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
