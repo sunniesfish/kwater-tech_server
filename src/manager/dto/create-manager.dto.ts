@@ -1,16 +1,16 @@
 import {
   IsNotEmpty,
   IsString,
-  MinLength,
-  MaxLength,
   Matches,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class LoginDto {
+export class CreateManagerDto {
   @ApiProperty({
     description: '관리자 ID',
-    example: 'admin123',
+    example: 'manager001',
     minLength: 3,
     maxLength: 20,
     pattern: '^[a-zA-Z0-9가-힣._@#$%&*+=!?-]+$',
@@ -26,8 +26,23 @@ export class LoginDto {
   managerId: string;
 
   @ApiProperty({
+    description: '관리자 이름',
+    example: '홍길동',
+    minLength: 1,
+    maxLength: 10,
+  })
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(1, { message: '이름은 최소 1자 이상이어야 합니다' })
+  @MaxLength(10, { message: '이름은 최대 10자까지 허용됩니다' })
+  @Matches(/^[a-zA-Z0-9가-힣_-]+$/, {
+    message: '이름은 영문자, 한글, 숫자, 언더스코어(_), 하이픈(-)만 허용됩니다',
+  })
+  managerName: string;
+
+  @ApiProperty({
     description: '비밀번호',
-    example: 'password123',
+    example: 'secret123',
     minLength: 6,
     maxLength: 11,
   })

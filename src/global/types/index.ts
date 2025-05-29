@@ -23,7 +23,7 @@ export type Division = OnlyOne<RawDivision>;
 export interface IUser {
   key: string;
   division: Division;
-  password: string;
+  divisionName: string;
 }
 
 export interface IAlarm {

@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { AlarmModule } from './alarm/alarm.module';
+import { ManagerModule } from './manager/manager.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 @Module({
   imports: [
@@ -23,9 +23,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       }),
       inject: [ConfigService],
     }),
-    UsersModule,
     AuthModule,
     AlarmModule,
+    ManagerModule,
   ],
 })
 export class AppModule {}

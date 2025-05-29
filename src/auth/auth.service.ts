@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
+import { ManagerService } from '../manager/manager.service';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
@@ -12,18 +12,19 @@ import { Response } from 'express';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UsersService,
+    private readonly managerService: ManagerService,
     private readonly jwtService: JwtService,
     @InjectModel(Connections.name)
     private readonly connectionsModel: Model<Connections>,
   ) {}
 
-  async validateUser(divisionId: string, password: string): Promise<any> {
+  async validateUser(managerId: string, password: string): Promise<any> {
     try {
-      const user = await this.usersService.findOne(divisionId);
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+      const manager = await this.managerService.findOne(managerId);
+      if (!manager) return null;
+      const isPasswordValid = await bcrypt.compare(password, manager.password);
       if (isPasswordValid) {
-        const { password, ...result } = user.toObject();
+        const { password, ...result } = manager.toObject();
         return result;
       }
       return null;
@@ -32,48 +33,46 @@ export class AuthService {
     }
   }
 
-  private generateTokens(divisionId: string, clientId: string) {
+  private generateTokens(managerId: string, clientId: string) {
     const accessToken = this.jwtService.sign(
-      { divisionId, clientId },
+      { managerId, clientId },
       { expiresIn: '1h' },
     );
     const refreshToken = this.jwtService.sign(
-      { divisionId, clientId },
+      { managerId, clientId },
       { expiresIn: '1d' },
     );
     return { accessToken, refreshToken };
   }
 
   async login(loginDto: LoginDto, res: Response) {
-    const user = await this.validateUser(
-      loginDto.divisionId,
+    const manager = await this.validateUser(
+      loginDto.managerId,
       loginDto.password,
     );
-    if (!user) {
+    if (!manager) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const clientId = uuidv4();
     const { accessToken, refreshToken } = this.generateTokens(
-      user.divisionId,
+      manager.managerId,
       clientId,
     );
 
-    // Save connection
     await this.connectionsModel.create({
       clientId,
-      divisionId: user.divisionId,
+      managerId: manager.managerId,
       refreshToken,
       createdAt: new Date(),
       lastSeen: new Date(),
     });
 
-    // Set refresh token in httpOnly cookie
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     return { accessToken };
@@ -87,18 +86,15 @@ export class AuthService {
   async refresh(refreshToken: string, res: Response) {
     try {
       const payload = this.jwtService.verify(refreshToken);
-      const { divisionId, clientId } = payload;
+      const { managerId, clientId } = payload;
 
-      // Check if connection exists and is valid
       const connection = await this.connectionsModel.findOne({ clientId });
       if (!connection || connection.refreshToken !== refreshToken) {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
-      // Generate new tokens
-      const newTokens = this.generateTokens(divisionId, clientId);
+      const newTokens = this.generateTokens(managerId, clientId);
 
-      // Update connection
       await this.connectionsModel.updateOne(
         { clientId },
         {
@@ -107,22 +103,21 @@ export class AuthService {
         },
       );
 
-      // Set new refresh token in cookie
       res.cookie('refreshToken', newTokens.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        maxAge: 24 * 60 * 60 * 1000,
       });
 
-      return { accessToken: newTokens.accessToken };
+      return { accessToken: newTokens.accessToken, managerId };
     } catch (error) {
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
 
-  async checkPassword(divisionId: string, password: string): Promise<boolean> {
-    const user = await this.validateUser(divisionId, password);
-    return !!user;
+  async checkPassword(managerId: string, password: string): Promise<boolean> {
+    const manager = await this.validateUser(managerId, password);
+    return !!manager;
   }
 }
